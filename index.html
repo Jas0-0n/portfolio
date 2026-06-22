@@ -1,409 +1,371 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jason Chen · Build systems that matter</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-/* ===== RESET & BASE ===== */
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-:root{
-  --bg:#070708;--bg-elevated:#0d0d0f;--bg-card:#121214;--bg-hover:#1a1a1e;
-  --text:#f0f0f0;--text-sec:#888890;--text-ter:#555557;
-  --accent:#ff6b35;--accent-soft:rgba(255,107,53,0.12);--accent-glow:rgba(255,107,53,0.25);
-  --border:#1e1e22;--radius:12px;--radius-sm:8px;--radius-full:100px;
-  --font:'Inter',-apple-system,sans-serif;--font-mono:'JetBrains Mono',monospace;
-  --ease:cubic-bezier(0.25,0.46,0.45,0.94);--nav-h:64px
-}
-body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-::selection{background:var(--accent);color:#fff}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-/* ===== UTILITY ===== */
-.container{max-width:1120px;margin:0 auto;padding:0 24px}
-.section{padding:100px 0;border-bottom:1px solid var(--border)}
-.section:last-of-type{border-bottom:none}
-.section-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-ter);margin-bottom:8px;font-weight:600}
-.section-label span{color:var(--accent)}
-.section-title{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:48px}
-/* ===== NAV ===== */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);background:rgba(7,7,8,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid transparent;transition:border-color .3s var(--ease)}
-nav.scrolled{border-color:var(--border)}
-.nav-inner{max-width:1120px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{font-weight:700;font-size:1.05rem;letter-spacing:-0.02em}
-.nav-logo span{color:var(--accent)}
-.nav-links{display:flex;gap:8px;list-style:none}
-.nav-links a{padding:8px 16px;font-size:0.85rem;color:var(--text-sec);border-radius:var(--radius-sm);transition:color .2s,background .2s}
-.nav-links a:hover{color:var(--text);background:var(--bg-hover)}
-.nav-contact{background:var(--accent);color:#fff!important;padding:8px 20px!important;border-radius:var(--radius-full);font-weight:600}
-.nav-contact:hover{background:#e85d2a!important}
-.nav-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
-.nav-toggle span{width:24px;height:2px;background:var(--text);border-radius:2px;transition:all .3s var(--ease)}
-/* ===== HERO ===== */
-.hero{min-height:100vh;display:flex;align-items:center;padding-top:var(--nav-h);position:relative;overflow:hidden}
-.hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.hero-bg-glow{position:absolute;top:-20%;right:-10%;width:700px;height:700px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);opacity:.5}
-.hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.3}
-.hero-meta{display:flex;gap:16px;align-items:center;font-size:0.8rem;color:var(--text-ter);font-family:var(--font-mono);margin-bottom:32px}
-.hero-meta .dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
-.hero-meta .status{color:#4ade80}
-.hero-headline{font-size:clamp(2.8rem,8vw,5rem);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin-bottom:24px;max-width:800px}
-.hero-headline .accent{color:var(--accent)}
-.hero-headline .outline{-webkit-text-fill-color:transparent;-webkit-text-stroke:1.5px var(--text);}
-.hero-sub{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--text-sec);max-width:520px;line-height:1.7;margin-bottom:40px}
-.hero-actions{display:flex;gap:16px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:var(--radius-full);font-size:0.9rem;font-weight:600;border:none;cursor:pointer;transition:all .3s var(--ease);font-family:var(--font)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px var(--accent-glow)}
-.btn-secondary{background:var(--bg-card);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{background:var(--bg-hover);border-color:var(--text-ter);transform:translateY(-2px)}
-.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-ter);font-size:0.7rem;letter-spacing:0.1em;animation:bounce 2s infinite}
-@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
-/* ===== ABOUT ===== */
-.about-grid{display:grid;grid-template-columns:auto 1fr;gap:56px;align-items:start}
-.about-photo{width:180px;height:180px;border-radius:50%;overflow:hidden;border:3px solid var(--border);flex-shrink:0;background:linear-gradient(135deg,var(--bg-hover),var(--border));position:relative}
-.about-photo .placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-ter);font-size:0.75rem;flex-direction:column;gap:4px}
-.about-text h3{font-size:1.4rem;font-weight:700;margin-bottom:16px;line-height:1.3}
-.about-text p{color:var(--text-sec);margin-bottom:24px;max-width:580px;font-size:0.95rem;line-height:1.7}
-.skill-cloud{display:flex;flex-wrap:wrap;gap:8px}
-.skill-tag{padding:6px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:0.8rem;color:var(--text-sec);transition:all .2s var(--ease)}
-.skill-tag:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
-.skill-tag.accent{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
-/* ===== EXPERIENCE ===== */
-.exp-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:48px;align-items:start}
-.timeline{position:relative;padding-left:28px}
-.timeline::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:var(--border)}
-.tl-item{position:relative;padding-bottom:32px}
-.tl-item:last-child{padding-bottom:0}
-.tl-item::before{content:'';position:absolute;left:-22px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
-.tl-item.active::before{background:var(--accent)}
-.tl-date{font-size:0.75rem;color:var(--text-ter);font-family:var(--font-mono);margin-bottom:4px}
-.tl-company{font-size:0.9rem;font-weight:600;margin-bottom:2px}
-.tl-role{font-size:0.85rem;color:var(--accent);margin-bottom:4px}
-.tl-desc{font-size:0.8rem;color:var(--text-sec)}
-.edu-card{background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);padding:28px;display:flex;flex-direction:column;gap:16px}
-.edu-item{}
-.edu-degree{font-weight:600;font-size:0.9rem}
-.edu-school{color:var(--text-sec);font-size:0.8rem}
-.edu-year{color:var(--text-ter);font-size:0.75rem;font-family:var(--font-mono)}
-/* ===== WORK ===== */
-.work-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.work-card{background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;transition:all .4s var(--ease);cursor:pointer;position:relative}
-.work-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 12px 40px rgba(0,0,0,.4)}
-.work-thumb{aspect-ratio:16/10;background:linear-gradient(135deg,var(--bg-hover),#1a1a20);display:flex;align-items:center;justify-content:center;color:var(--text-ter);font-size:0.8rem;font-family:var(--font-mono);flex-direction:column;gap:8px;position:relative;overflow:hidden}
-.work-thumb .icon{font-size:2rem;opacity:.4}
-.work-info{padding:24px}
-.work-info h4{font-size:1rem;font-weight:600;margin-bottom:6px}
-.work-info p{font-size:0.82rem;color:var(--text-sec);margin-bottom:14px;line-height:1.5}
-.work-tags{display:flex;flex-wrap:wrap;gap:6px}
-.work-tag{padding:3px 10px;border-radius:var(--radius-full);font-size:0.7rem;background:var(--bg-hover);color:var(--text-ter);letter-spacing:.02em}
-.show-all-wrap{text-align:center;margin-top:36px}
-.show-all{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1px solid var(--border);border-radius:var(--radius-full);color:var(--text-sec);font-size:0.85rem;font-weight:500;transition:all .3s var(--ease);background:none;cursor:pointer;font-family:var(--font)}
-.show-all:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-/* ===== FOOTER ===== */
-footer{padding:80px 0 40px}
-.footer-top{text-align:center;margin-bottom:56px}
-.footer-cta{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;margin-bottom:8px}
-.footer-cta a{color:var(--accent);position:relative}
-.footer-cta a::after{content:'';position:absolute;left:0;bottom:-2px;width:100%;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:right;transition:transform .3s var(--ease)}
-.footer-cta a:hover::after{transform:scaleX(1);transform-origin:left}
-.footer-sub{color:var(--text-ter);font-size:0.9rem;margin-bottom:32px}
-.footer-social{display:flex;gap:12px;justify-content:center;margin-bottom:40px}
-.footer-social a{width:48px;height:48px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-sec);font-size:0.75rem;font-weight:600;transition:all .2s var(--ease)}
-.footer-social a:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);transform:translateY(-3px)}
-.footer-divider{height:1px;background:var(--border);margin-bottom:24px}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.footer-copy{font-size:0.75rem;color:var(--text-ter)}
-.footer-links{display:flex;gap:20px}
-.footer-links a{font-size:0.75rem;color:var(--text-ter);transition:color .2s}
-.footer-links a:hover{color:var(--text)}
-.back-top{position:fixed;bottom:32px;right:32px;width:44px;height:44px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-sec);cursor:pointer;opacity:0;transform:translateY(20px);transition:all .4s var(--ease);font-size:1.1rem;z-index:50}
-.back-top.visible{opacity:1;transform:translateY(0)}
-.back-top:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
-/* ===== SCROLL ANIMATIONS ===== */
-.reveal{opacity:0;transform:translateY(40px);transition:all .7s var(--ease)}
-.reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-delay-1{transition-delay:.1s}
-.reveal-delay-2{transition-delay:.2s}
-.reveal-delay-3{transition-delay:.3s}
-/* ===== RESPONSIVE ===== */
-@media(max-width:900px){
-  .about-grid{grid-template-columns:1fr;text-align:center}
-  .about-photo{margin:0 auto}
-  .about-text p{margin:0 auto 24px}
-  .skill-cloud{justify-content:center}
-  .exp-grid{grid-template-columns:1fr}
-  .work-grid{grid-template-columns:1fr}
-}
-@media(max-width:768px){
-  .section{padding:64px 0}
-  .nav-links{display:none;position:absolute;top:var(--nav-h);left:0;right:0;background:rgba(7,7,8,.98);backdrop-filter:blur(20px);flex-direction:column;padding:16px 24px 24px;border-bottom:1px solid var(--border)}
-  .nav-links.open{display:flex}
-  .nav-toggle{display:flex}
-  .hero-headline{font-size:clamp(2rem,10vw,3rem)}
-  .footer-bottom{flex-direction:column;text-align:center}
-  .hero-actions{gap:12px}
-  .btn{padding:12px 24px;font-size:0.85rem}
-}
-</style>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Jason Chen · Build systems that matter</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="styles/main.css" />
+    </head>
+    <body>
+        <!-- NAV -->
+        <nav id="nav">
+            <div class="nav-inner">
+                <a href="#" class="nav-logo">
+                    Jason
+                    <span>.</span>
+                </a>
+                <button
+                    class="nav-toggle"
+                    id="navToggle"
+                    aria-label="Toggle menu"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#work">Work</a></li>
+                    <li><a href="#contact" class="nav-contact">Contact</a></li>
+                </ul>
+            </div>
+        </nav>
 
-<!-- NAV -->
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="#" class="nav-logo">Jason<span>.</span></a>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#about">About</a></li>
-      <li><a href="#experience">Experience</a></li>
-      <li><a href="#work">Work</a></li>
-      <li><a href="#contact" class="nav-contact">Contact</a></li>
-    </ul>
-  </div>
-</nav>
+        <!-- HERO -->
+        <section class="hero" id="hero">
+            <div class="hero-bg">
+                <div class="hero-bg-glow"></div>
+                <div class="hero-bg-grid"></div>
+            </div>
+            <div class="container hero-container">
+                <div class="hero-meta">
+                    <span class="status">&#9679;</span>
+                    <span>AVAILABLE</span>
+                    <span class="dot"></span>
+                    <span>JASON</span>
+                    <span class="dot"></span>
+                    <span>HONG KONG</span>
+                    <span class="dot"></span>
+                    <span>HKT+8</span>
+                </div>
+                <h1 class="hero-headline">
+                    Build systems
+                    <br />
+                    that
+                    <span class="accent">matter</span>
+                </h1>
+                <p class="hero-sub">
+                    Product-minded engineer &amp; APM with 5+ years turning
+                    complex requirements into reliable, scalable products
+                    &mdash; from search engines to flash delivery
+                    infrastructure.
+                </p>
+                <div class="hero-actions">
+                    <a href="#work" class="btn btn-primary">
+                        View my work &#8594;
+                    </a>
+                    <a href="#contact" class="btn btn-secondary">
+                        Get in touch &#8599;
+                    </a>
+                </div>
+            </div>
+            <div class="hero-scroll">
+                <span>SCROLL</span>
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path
+                        d="M1 1L6 6L11 1"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                    />
+                </svg>
+            </div>
+        </section>
 
-<!-- HERO -->
-<section class="hero" id="hero">
-  <div class="hero-bg">
-    <div class="hero-bg-glow"></div>
-    <div class="hero-bg-grid"></div>
-  </div>
-  <div class="container" style="position:relative;z-index:1">
-    <div class="hero-meta">
-      <span class="status">&#9679;</span><span>AVAILABLE</span><span class="dot"></span>
-      <span>JASON</span><span class="dot"></span><span>HONG KONG</span><span class="dot"></span><span>HKT+8</span>
-    </div>
-    <h1 class="hero-headline">
-      Build systems<br>
-      that <span class="accent">matter</span>
-    </h1>
-    <p class="hero-sub">
-      Product-minded engineer &amp; APM with 5+ years turning complex requirements into 
-      reliable, scalable products &mdash; from search engines to flash delivery infrastructure.
-    </p>
-    <div class="hero-actions">
-      <a href="#work" class="btn btn-primary">View my work &#8594;</a>
-      <a href="#contact" class="btn btn-secondary">Get in touch &#8599;</a>
-    </div>
-  </div>
-  <div class="hero-scroll">
-    <span>SCROLL</span>
-    <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-  </div>
-</section>
+        <!-- ABOUT -->
+        <section class="section" id="about">
+            <div class="container">
+                <div class="section-label reveal">
+                    <span>01</span>
+                    About
+                </div>
+                <div class="about-grid">
+                    <div class="about-photo reveal">
+                        <div class="placeholder">
+                            <span class="placeholder-icon">&#128100;</span>
+                            <span>Your photo</span>
+                        </div>
+                    </div>
+                    <div class="about-text">
+                        <h3 class="reveal reveal-delay-1">
+                            I bridge product vision with technical delivery
+                        </h3>
+                        <p class="reveal reveal-delay-2">
+                            Based in Hong Kong, I bring 5+ years of experience
+                            spanning full-stack web development and product
+                            management. Currently serving as an APM at YOHO HONG
+                            KONG LTD (HKG:2347), where I coordinate
+                            cross-functional teams to deliver ecommerce
+                            solutions that serve both businesses and consumers.
+                        </p>
+                        <p class="reveal reveal-delay-2">
+                            Previously, as a Senior Web Developer, I designed
+                            and built high-impact systems including a product
+                            search engine, a personalized recommendation engine,
+                            an in-house advertising platform, and a flash-sale
+                            delivery system &mdash; all at scale.
+                        </p>
+                        <div class="skill-cloud reveal reveal-delay-3">
+                            <span class="skill-tag accent">React</span>
+                            <span class="skill-tag accent">TypeScript</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">Redis</span>
+                            <span class="skill-tag">Redux</span>
+                            <span class="skill-tag">Redux-Saga</span>
+                            <span class="skill-tag accent">System Design</span>
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Elasticsearch</span>
+                            <span class="skill-tag">Agile / Jira</span>
+                            <span class="skill-tag">Figma</span>
+                            <span class="skill-tag">Code Review</span>
+                            <span class="skill-tag accent">APM</span>
+                            <span class="skill-tag">Cross-functional</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<!-- ABOUT -->
-<section class="section" id="about">
-  <div class="container">
-    <div class="section-label reveal"><span>01</span> About</div>
-    <div class="about-grid">
-      <div class="about-photo reveal">
-        <div class="placeholder">
-          <span style="font-size:2rem">&#128100;</span>
-          <span>Your photo</span>
-        </div>
-      </div>
-      <div class="about-text">
-        <h3 class="reveal reveal-delay-1">I bridge product vision with technical delivery</h3>
-        <p class="reveal reveal-delay-2">
-          Based in Hong Kong, I bring 5+ years of experience spanning full-stack web development 
-          and product management. Currently serving as an APM at YOHO HONG KONG LTD (HKG:2347), 
-          where I coordinate cross-functional teams to deliver ecommerce solutions that serve 
-          both businesses and consumers.
-        </p>
-        <p class="reveal reveal-delay-2">
-          Previously, as a Senior Web Developer, I designed and built high-impact systems including 
-          a product search engine, a personalized recommendation engine, an in-house advertising 
-          platform, and a flash-sale delivery system &mdash; all at scale.
-        </p>
-        <div class="skill-cloud reveal reveal-delay-3">
-          <span class="skill-tag accent">React</span>
-          <span class="skill-tag accent">TypeScript</span>
-          <span class="skill-tag">Node.js</span>
-          <span class="skill-tag">Redis</span>
-          <span class="skill-tag">Redux</span>
-          <span class="skill-tag">Redux-Saga</span>
-          <span class="skill-tag accent">System Design</span>
-          <span class="skill-tag">Python</span>
-          <span class="skill-tag">Elasticsearch</span>
-          <span class="skill-tag">Agile / Jira</span>
-          <span class="skill-tag">Figma</span>
-          <span class="skill-tag">Code Review</span>
-          <span class="skill-tag accent">APM</span>
-          <span class="skill-tag">Cross-functional</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+        <!-- EXPERIENCE -->
+        <section class="section" id="experience">
+            <div class="container">
+                <div class="section-label reveal">
+                    <span>02</span>
+                    Experience
+                </div>
+                <h2 class="section-title reveal">Where I've been</h2>
+                <div class="exp-grid">
+                    <div class="timeline reveal">
+                        <div class="tl-item active">
+                            <div class="tl-date">Sep 2024 &mdash; Present</div>
+                            <div class="tl-company">
+                                YOHO HONG KONG LTD (HKG:2347)
+                            </div>
+                            <div class="tl-role">Associate Product Manager</div>
+                            <div class="tl-desc">
+                                Leading cross-functional product delivery for
+                                B2C/B2B ecommerce platform. Bridging
+                                engineering, design, and business to ship
+                                features that drive growth.
+                            </div>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-date">Sep 2022 &mdash; Sep 2024</div>
+                            <div class="tl-company">YOHO HONG KONG LTD</div>
+                            <div class="tl-role">Senior Web Developer</div>
+                            <div class="tl-desc">
+                                Architected and built search engine,
+                                recommendation system, ad platform, and flash
+                                delivery infrastructure serving millions of
+                                users.
+                            </div>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-date">Sep 2021 &mdash; Sep 2022</div>
+                            <div class="tl-company">YOHO HONG KONG LTD</div>
+                            <div class="tl-role">Web Developer</div>
+                            <div class="tl-desc">
+                                Developed component library, led code reviews,
+                                and established frontend best practices for the
+                                engineering team.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reveal reveal-delay-2">
+                        <div class="edu-card">
+                            <div class="edu-item">
+                                <div class="edu-degree">
+                                    MSc Advanced Information Systems
+                                </div>
+                                <div class="edu-school">
+                                    Hong Kong Baptist University
+                                </div>
+                                <div class="edu-year">2020 &mdash; 2021</div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="edu-item">
+                                <div class="edu-degree">
+                                    BSc Computer Science
+                                </div>
+                                <div class="edu-school">
+                                    Zhaoqing University
+                                </div>
+                                <div class="edu-year">2016 &mdash; 2020</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<!-- EXPERIENCE -->
-<section class="section" id="experience">
-  <div class="container">
-    <div class="section-label reveal"><span>02</span> Experience</div>
-    <h2 class="section-title reveal">Where I've been</h2>
-    <div class="exp-grid">
-      <div class="timeline reveal">
-        <div class="tl-item active">
-          <div class="tl-date">Sep 2024 &mdash; Present</div>
-          <div class="tl-company">YOHO HONG KONG LTD (HKG:2347)</div>
-          <div class="tl-role">Associate Product Manager</div>
-          <div class="tl-desc">Leading cross-functional product delivery for B2C/B2B ecommerce platform. Bridging engineering, design, and business to ship features that drive growth.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">Sep 2022 &mdash; Sep 2024</div>
-          <div class="tl-company">YOHO HONG KONG LTD</div>
-          <div class="tl-role">Senior Web Developer</div>
-          <div class="tl-desc">Architected and built search engine, recommendation system, ad platform, and flash delivery infrastructure serving millions of users.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">Sep 2021 &mdash; Sep 2022</div>
-          <div class="tl-company">YOHO HONG KONG LTD</div>
-          <div class="tl-role">Web Developer</div>
-          <div class="tl-desc">Developed component library, led code reviews, and established frontend best practices for the engineering team.</div>
-        </div>
-      </div>
-      <div class="reveal reveal-delay-2">
-        <div class="edu-card">
-          <div class="edu-item">
-            <div class="edu-degree">MSc Advanced Information Systems</div>
-            <div class="edu-school">Hong Kong Baptist University</div>
-            <div class="edu-year">2020 &mdash; 2021</div>
-          </div>
-          <div style="height:1px;background:var(--border)"></div>
-          <div class="edu-item">
-            <div class="edu-degree">BSc Computer Science</div>
-            <div class="edu-school">Zhaoqing University</div>
-            <div class="edu-year">2016 &mdash; 2020</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+        <!-- WORK -->
+        <section class="section" id="work">
+            <div class="container">
+                <div class="section-label reveal">
+                    <span>03</span>
+                    Work
+                </div>
+                <h2 class="section-title reveal">Featured projects</h2>
+                <div class="work-grid">
+                    <div class="work-card reveal">
+                        <div class="work-thumb">
+                            <span class="icon">&#128269;</span>
+                            <span>E-Commerce Search Engine</span>
+                        </div>
+                        <div class="work-info">
+                            <h4>Product Search Engine</h4>
+                            <p>
+                                High-performance search with faceted filtering,
+                                autocomplete suggestions, and ML-powered
+                                ranking. Serves millions of product queries
+                                daily with sub-second latency.
+                            </p>
+                            <div class="work-tags">
+                                <span class="work-tag">React</span>
+                                <span class="work-tag">Elasticsearch</span>
+                                <span class="work-tag">Redis</span>
+                                <span class="work-tag">Node.js</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="work-card reveal reveal-delay-1">
+                        <div class="work-thumb">
+                            <span class="icon">&#128200;</span>
+                            <span>Recommendation Engine</span>
+                        </div>
+                        <div class="work-info">
+                            <h4>Recommendation System</h4>
+                            <p>
+                                Personalized product recommendation engine
+                                driving cross-sell and upsell. Implemented A/B
+                                testing framework to optimize conversion lift
+                                across user segments.
+                            </p>
+                            <div class="work-tags">
+                                <span class="work-tag">Python</span>
+                                <span class="work-tag">Redis</span>
+                                <span class="work-tag">React</span>
+                                <span class="work-tag">A/B Testing</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="work-card reveal reveal-delay-2">
+                        <div class="work-thumb">
+                            <span class="icon">&#128250;</span>
+                            <span>Ad Serving Platform</span>
+                        </div>
+                        <div class="work-info">
+                            <h4>Advertising System</h4>
+                            <p>
+                                In-house ad serving platform with real-time
+                                bidding, campaign lifecycle management, and
+                                comprehensive performance analytics dashboard
+                                for advertisers.
+                            </p>
+                            <div class="work-tags">
+                                <span class="work-tag">React</span>
+                                <span class="work-tag">Redux</span>
+                                <span class="work-tag">Node.js</span>
+                                <span class="work-tag">System Design</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="work-card reveal reveal-delay-3">
+                        <div class="work-thumb">
+                            <span class="icon">&#9889;</span>
+                            <span>Flash Delivery System</span>
+                        </div>
+                        <div class="work-info">
+                            <h4>Flash Delivery</h4>
+                            <p>
+                                High-throughput flash sale delivery system
+                                handling traffic spikes with real-time inventory
+                                management, distributed queue orchestration, and
+                                failure recovery.
+                            </p>
+                            <div class="work-tags">
+                                <span class="work-tag">Node.js</span>
+                                <span class="work-tag">Redis</span>
+                                <span class="work-tag">Queue</span>
+                                <span class="work-tag">Performance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<!-- WORK -->
-<section class="section" id="work">
-  <div class="container">
-    <div class="section-label reveal"><span>03</span> Work</div>
-    <h2 class="section-title reveal">Featured projects</h2>
-    <div class="work-grid">
-      <div class="work-card reveal">
-        <div class="work-thumb"><span class="icon">&#128269;</span><span>E-Commerce Search Engine</span></div>
-        <div class="work-info">
-          <h4>Product Search Engine</h4>
-          <p>High-performance search with faceted filtering, autocomplete suggestions, and ML-powered ranking. Serves millions of product queries daily with sub-second latency.</p>
-          <div class="work-tags">
-            <span class="work-tag">React</span>
-            <span class="work-tag">Elasticsearch</span>
-            <span class="work-tag">Redis</span>
-            <span class="work-tag">Node.js</span>
-          </div>
-        </div>
-      </div>
-      <div class="work-card reveal reveal-delay-1">
-        <div class="work-thumb"><span class="icon">&#128200;</span><span>Recommendation Engine</span></div>
-        <div class="work-info">
-          <h4>Recommendation System</h4>
-          <p>Personalized product recommendation engine driving cross-sell and upsell. Implemented A/B testing framework to optimize conversion lift across user segments.</p>
-          <div class="work-tags">
-            <span class="work-tag">Python</span>
-            <span class="work-tag">Redis</span>
-            <span class="work-tag">React</span>
-            <span class="work-tag">A/B Testing</span>
-          </div>
-        </div>
-      </div>
-      <div class="work-card reveal reveal-delay-2">
-        <div class="work-thumb"><span class="icon">&#128250;</span><span>Ad Serving Platform</span></div>
-        <div class="work-info">
-          <h4>Advertising System</h4>
-          <p>In-house ad serving platform with real-time bidding, campaign lifecycle management, and comprehensive performance analytics dashboard for advertisers.</p>
-          <div class="work-tags">
-            <span class="work-tag">React</span>
-            <span class="work-tag">Redux</span>
-            <span class="work-tag">Node.js</span>
-            <span class="work-tag">System Design</span>
-          </div>
-        </div>
-      </div>
-      <div class="work-card reveal reveal-delay-3">
-        <div class="work-thumb"><span class="icon">&#9889;</span><span>Flash Delivery System</span></div>
-        <div class="work-info">
-          <h4>Flash Delivery</h4>
-          <p>High-throughput flash sale delivery system handling traffic spikes with real-time inventory management, distributed queue orchestration, and failure recovery.</p>
-          <div class="work-tags">
-            <span class="work-tag">Node.js</span>
-            <span class="work-tag">Redis</span>
-            <span class="work-tag">Queue</span>
-            <span class="work-tag">Performance</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+        <!-- CONTACT / FOOTER -->
+        <footer id="contact">
+            <div class="container">
+                <div class="footer-top reveal">
+                    <div class="footer-cta">
+                        Let's build something
+                        <a href="mailto:your.email@example.com">together</a>
+                        .
+                    </div>
+                    <p class="footer-sub">
+                        Hong Kong &middot; Open to opportunities &amp;
+                        collaborations
+                    </p>
+                    <div class="footer-social">
+                        <a
+                            href="https://github.com/"
+                            target="_blank"
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                            GH
+                        </a>
+                        <a
+                            href="https://linkedin.com/in/"
+                            target="_blank"
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                            LI
+                        </a>
+                        <a href="mailto:your.email@example.com" title="Email">
+                            @
+                        </a>
+                        <a href="#" title="X / Twitter">X</a>
+                    </div>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-bottom">
+                    <span class="footer-copy">
+                        &copy; 2026 Jason Chen. All rights reserved.
+                    </span>
+                    <div class="footer-links">
+                        <a href="#about">About</a>
+                        <a href="#experience">Experience</a>
+                        <a href="#work">Work</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
 
-<!-- CONTACT / FOOTER -->
-<footer id="contact">
-  <div class="container">
-    <div class="footer-top reveal">
-      <div class="footer-cta">Let's build something <a href="mailto:your.email@example.com">together</a>.</div>
-      <p class="footer-sub">Hong Kong &middot; Open to opportunities &amp; collaborations</p>
-      <div class="footer-social">
-        <a href="https://github.com/" target="_blank" rel="noopener" title="GitHub">GH</a>
-        <a href="https://linkedin.com/in/" target="_blank" rel="noopener" title="LinkedIn">LI</a>
-        <a href="mailto:your.email@example.com" title="Email">@</a>
-        <a href="#" title="X / Twitter">X</a>
-      </div>
-    </div>
-    <div class="footer-divider"></div>
-    <div class="footer-bottom">
-      <span class="footer-copy">&copy; 2026 Jason Chen. All rights reserved.</span>
-      <div class="footer-links">
-        <a href="#about">About</a>
-        <a href="#experience">Experience</a>
-        <a href="#work">Work</a>
-      </div>
-    </div>
-  </div>
-</footer>
+        <!-- BACK TO TOP -->
+        <button class="back-top" id="backTop" aria-label="Back to top">
+            &#8593;
+        </button>
 
-<!-- BACK TO TOP -->
-<button class="back-top" id="backTop" aria-label="Back to top">&#8593;</button>
-
-<script>
-// Mobile nav toggle
-const toggle = document.getElementById('navToggle');
-const links = document.getElementById('navLinks');
-toggle.addEventListener('click', () => links.classList.toggle('open'));
-
-// Close nav on link click
-links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
-
-// Nav scroll effect
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 50));
-
-// Back to top
-const backTop = document.getElementById('backTop');
-window.addEventListener('scroll', () => backTop.classList.toggle('visible', window.scrollY > 400));
-backTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
-
-// Scroll reveal
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting){ entry.target.classList.add('visible'); }
-  });
-}, {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
-
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
-</body>
+        <script src="js/main.js"></script>
+    </body>
 </html>
