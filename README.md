@@ -3,54 +3,98 @@
 > **Build systems that matter**
 
 Personal portfolio website — dark minimal design inspired by modern designer portfolios.
+Migrated to **React + TypeScript + TailwindCSS** with full test coverage.
 
 ## Tech Stack
 
-- **HTML5** — semantic structure
-- **CSS3** — custom properties, grid, flexbox, animations
-- **Vanilla JS** — Intersection Observer, smooth scroll, nav interactions
-- **Google Fonts** — Inter + JetBrains Mono
-- **Zero dependencies** — open directly or deploy anywhere
+- **React 18+** — Component-based UI with concurrent rendering
+- **TypeScript** — Strong typing, zero `any`
+- **Vite** — Fast dev server and build tool (replaced zero-dependency HTML)
+- **TailwindCSS** — Utility-first styling with custom design tokens
+- **Vitest + React Testing Library** — Unit and interaction testing
+- **Playwright** — End-to-end testing
+- **Biome** — Unified lint and format (replaces ESLint + Prettier)
+- **Husky + Commitlint** — Git hooks and conventional commits
 
 ## Local Development
 
 ```bash
-# Just open the file
-open index.html
+# Install dependencies
+pnpm install
 
-# Or serve locally
-python3 -m http.server 8000
-# http://localhost:8000
+# Start dev server
+pnpm dev
+# http://localhost:5173
+
+# Run tests
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Run E2E tests
+pnpm test:e2e
+
+# Build for production
+pnpm build
+
+# Preview production build locally
+pnpm preview
 ```
 
-## Deployment (GitHub Pages)
+## Deployment
 
-1. Push this repo to GitHub
-2. Go to Settings → Pages → Source: Deploy from branch `main`, root `/`
-3. Your site will be live at `https://<username>.github.io/jason-portfolio/`
+Push to GitHub and deploy the `dist/` folder to any static hosting (Vercel, Cloudflare Pages, GitHub Pages).
+
+> **BREAKING CHANGE**: This is no longer a zero-dependency static HTML site. The `dist/` folder is produced by `pnpm build` and must be served by a static file server — opening `index.html` directly will not work.
 
 ## Maintenance
 
-Edit `index.html` to update content. To add new projects, duplicate a `.work-card` block in the Work section.
+Content is now data-driven. Edit the files in `src/data/` to update:
+
+-   `profile.ts` — Hero status, location, headline, subline
+-   `about.ts` — Bio paragraphs and skill tags
+-   `experience.ts` — Timeline items and education
+-   `work.ts` — Project cards (update emoji, title, description, tags)
+-   `navigation.ts` — Nav links
+-   `social.ts` — Social links (replace placeholders with your real URLs)
 
 ## Sections
 
-| Section | Content |
-|---------|---------|
-| Hero | Headline, tagline, CTA buttons |
-| About | Bio, photo placeholder, skill tags |
-| Experience | Timeline (YOHO), Education card (HKBU, Zhaoqing U) |
-| Work | 4 featured project cards |
-| Footer | Social links, email contact |
+| Section    | Content                                                      |
+|------------|--------------------------------------------------------------|
+| Hero       | Headline, tagline, CTA buttons                               |
+| About      | Bio, photo placeholder, skill tags                           |
+| Experience | Timeline (YOHO), Education card (HKBU, Zhaoqing U)           |
+| Work       | 4 featured project cards                                      |
+| Footer     | Social links, email contact                                  |
 
-## TODO (you)
+## Placeholders (need your real content)
 
-- [ ] Replace photo placeholder with your actual headshot
-- [ ] Add real project screenshots
-- [ ] Update social links (GitHub, LinkedIn, email)
-- [ ] Customize the headline if desired
-- [ ] Deploy to GitHub Pages
+-   [ ] Replace About photo placeholder with your actual headshot
+-   [ ] Replace Work emoji icons (`🔍📊📡⚡`) with real project screenshots
+-   [ ] Update social links in `src/data/social.ts` (currently `your.email@example.com`, `https://github.com/`, `https://linkedin.com/in/`, `#`)
+-   [ ] Customize the headline if desired
+-   [ ] Deploy to your preferred static host
 
----
+## Project Structure
 
-Built with Vanilla HTML/CSS/JS · © 2026 Jason Chen
+```
+src/
+├── app/              # App root component
+├── components/
+│   ├── layout/       # Header, Footer
+│   ├── sections/     # Hero, About, Experience, Work
+│   └── ui/           # Button, SectionLabel, SkillTag, BackToTop, WorkCard, TimelineItem, EducationCard
+├── data/             # Content data files (TypeScript)
+├── hooks/            # Custom React hooks
+├── types/            # Shared TypeScript interfaces
+└── tests/            # Test setup
+
+tests/
+└── e2e/              # Playwright E2E tests
+```
+
+## License
+
+Built with React + TypeScript + TailwindCSS · © 2026 Jason Chen
