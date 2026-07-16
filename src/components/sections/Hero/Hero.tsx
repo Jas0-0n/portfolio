@@ -1,3 +1,4 @@
+import { profile } from "../../../data/profile";
 import { Button } from "../../ui/Button";
 import TextType from "../../ui/TextType/TextType";
 
@@ -14,15 +15,15 @@ export function Hero() {
             <div className="max-w-[1120px] mx-auto px-6 relative z-10">
                 <div className="flex gap-4 items-center text-sm text-text-ter font-mono mb-8">
                     <span className="text-green-400">●</span>
-                    <span>AVAILABLE</span>
+                    <span>{profile.status}</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                    <span>JASON</span>
+                    <span>{profile.name}</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                    <span>HONG KONG</span>
+                    <span>{profile.location}</span>
                 </div>
                 <TextType
                     as="h1"
-                    text={["AI-native.", "Product-first.", "Code-ready."]}
+                    text={profile.headlines}
                     textColors={["inherit", "inherit", "#ff6b35"]}
                     className="text-[clamp(2.8rem,8vw,5rem)] font-black tracking-tight leading-[1.15] mb-6 max-w-[800px]"
                     typingSpeed={75}
@@ -34,13 +35,10 @@ export function Hero() {
                     separator={[<br key="br1" />, <br key="br2" />]}
                 />
                 <p className="text-[clamp(1rem,1.5vw,1.2rem)] text-text-sec max-w-[520px] leading-7 mb-10">
-                    6 years at the intersection of code and commerce — full-stack engineering,
-                    product leadership, and agentic thinking. B2C storefronts, 3P merchant
-                    platforms, and internal ERP systems — all built to scale. Now prototyping MVPs
-                    with vibe coding and AI agents to validate market opportunities.
+                    {profile.subline}
                 </p>
                 <div className="flex gap-4 flex-wrap">
-                    <Button href="#work">View my work →</Button>
+                    <Button href="#work">View my work {"->"}</Button>
                     <Button href="#contact" variant="secondary">
                         Get in touch ↗
                     </Button>

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { usePrefersReducedMotion } from "../../hooks/usePrefersReducedMotion";
 
 type CanvasStrokeStyle = string | CanvasGradient | CanvasPattern;
 
@@ -34,6 +35,7 @@ const ShapeGrid = ({
     const hoveredSquareRef = useRef<GridOffset | null>(null);
     const trailCells = useRef<GridOffset[]>([]);
     const cellOpacities = useRef<Map<string, number>>(new Map());
+    const prefersReducedMotion = usePrefersReducedMotion();
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -205,32 +207,42 @@ const ShapeGrid = ({
         };
 
         const updateAnimation = () => {
-            const effectiveSpeed = Math.max(speed, 0.1);
-            const wrapX = isHex ? hexHoriz * 2 : squareSize;
-            const wrapY = isHex ? hexVert : isTri ? squareSize * 2 : squareSize;
+            if (!prefersReducedMotion) {
+                const effectiveSpeed = Math.max(speed, 0.1);
+                const wrapX = isHex ? hexHoriz * 2 : squareSize;
+                const wrapY = isHex ? hexVert : isTri ? squareSize * 2 : squareSize;
 
-            switch (direction) {
-                case "right":
-                    gridOffset.current.x = (gridOffset.current.x - effectiveSpeed + wrapX) % wrapX;
-                    break;
-                case "left":
-                    gridOffset.current.x = (gridOffset.current.x + effectiveSpeed + wrapX) % wrapX;
-                    break;
-                case "up":
-                    gridOffset.current.y = (gridOffset.current.y + effectiveSpeed + wrapY) % wrapY;
-                    break;
-                case "down":
-                    gridOffset.current.y = (gridOffset.current.y - effectiveSpeed + wrapY) % wrapY;
-                    break;
-                case "diagonal":
-                    gridOffset.current.x = (gridOffset.current.x - effectiveSpeed + wrapX) % wrapX;
-                    gridOffset.current.y = (gridOffset.current.y - effectiveSpeed + wrapY) % wrapY;
-                    break;
+                switch (direction) {
+                    case "right":
+                        gridOffset.current.x =
+                            (gridOffset.current.x - effectiveSpeed + wrapX) % wrapX;
+                        break;
+                    case "left":
+                        gridOffset.current.x =
+                            (gridOffset.current.x + effectiveSpeed + wrapX) % wrapX;
+                        break;
+                    case "up":
+                        gridOffset.current.y =
+                            (gridOffset.current.y + effectiveSpeed + wrapY) % wrapY;
+                        break;
+                    case "down":
+                        gridOffset.current.y =
+                            (gridOffset.current.y - effectiveSpeed + wrapY) % wrapY;
+                        break;
+                    case "diagonal":
+                        gridOffset.current.x =
+                            (gridOffset.current.x - effectiveSpeed + wrapX) % wrapX;
+                        gridOffset.current.y =
+                            (gridOffset.current.y - effectiveSpeed + wrapY) % wrapY;
+                        break;
+                }
             }
 
             updateCellOpacities();
             drawGrid();
-            requestRef.current = requestAnimationFrame(updateAnimation);
+            if (!prefersReducedMotion) {
+                requestRef.current = requestAnimationFrame(updateAnimation);
+            }
         };
 
         const updateCellOpacities = () => {
@@ -393,7 +405,16 @@ const ShapeGrid = ({
             canvas.removeEventListener("mousemove", handleMouseMove);
             canvas.removeEventListener("mouseleave", handleMouseLeave);
         };
-    }, [direction, speed, borderColor, hoverFillColor, squareSize, shape, hoverTrailAmount]);
+    }, [
+        direction,
+        speed,
+        borderColor,
+        hoverFillColor,
+        squareSize,
+        shape,
+        hoverTrailAmount,
+        prefersReducedMotion,
+    ]);
 
     return (
         <canvas ref={canvasRef} className="w-full h-full border-none block pointer-events-auto" />

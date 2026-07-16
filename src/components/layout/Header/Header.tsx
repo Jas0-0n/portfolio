@@ -25,7 +25,7 @@ export function Header() {
                     aria-label="Toggle menu"
                     aria-expanded={isOpen}
                     aria-controls="mobile-nav"
-                    className="hidden flex-col gap-1.5 cursor-none p-1 max-sm:flex"
+                    className="hidden flex-col gap-1.5 p-1 max-sm:flex"
                 >
                     <span className="w-6 h-0.5 bg-text rounded-sm" />
                     <span className="w-6 h-0.5 bg-text rounded-sm" />
@@ -38,22 +38,25 @@ export function Header() {
                         isOpen ? "max-sm:flex" : "max-sm:hidden"
                     }`}
                 >
-                    {navigation.map((link) => (
-                        <li key={link.href} role="none">
-                            <a
-                                href={link.href}
-                                onClick={close}
-                                role="menuitem"
-                                className={`px-4 py-2 text-[0.85rem] text-text-sec rounded-sm transition-colors hover:text-text hover:bg-bg-hover ${
-                                    link.href === "#contact"
-                                        ? "!bg-accent !text-white !font-semibold rounded-full px-5 hover:!bg-[#e85d2a]"
-                                        : ""
-                                }`}
-                            >
-                                {link.label}
-                            </a>
-                        </li>
-                    ))}
+                    {navigation.map((link) => {
+                        const isContact = link.href === "#contact";
+                        return (
+                            <li key={link.href} role="none">
+                                <a
+                                    href={link.href}
+                                    onClick={close}
+                                    role="menuitem"
+                                    className={
+                                        isContact
+                                            ? "px-5 py-2 text-[0.85rem] bg-accent text-white font-semibold rounded-full transition-colors hover:bg-[#e85d2a]"
+                                            : "px-4 py-2 text-[0.85rem] text-text-sec rounded-sm transition-colors hover:text-text hover:bg-bg-hover"
+                                    }
+                                >
+                                    {link.label}
+                                </a>
+                            </li>
+                        );
+                    })}
                 </ul>
             </div>
         </nav>

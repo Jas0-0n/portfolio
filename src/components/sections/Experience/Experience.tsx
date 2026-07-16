@@ -30,7 +30,7 @@ export function Experience() {
                     >
                         <div className="absolute left-1.5 top-2 bottom-2 w-px bg-border" />
                         {experience.timeline.map((item, idx) => (
-                            <TimelineItem key={idx} item={item} />
+                            <TimelineItem key={`${item.company}-${idx}`} item={item} />
                         ))}
                     </div>
                     <div

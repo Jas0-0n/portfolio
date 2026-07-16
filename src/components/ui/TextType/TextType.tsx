@@ -8,6 +8,7 @@ import {
     useRef,
     useState,
 } from "react";
+import { usePrefersReducedMotion } from "../../../hooks/usePrefersReducedMotion";
 
 interface TextTypeProps {
     className?: string;
@@ -65,8 +66,26 @@ const TextType = ({
     const [completedTexts, setCompletedTexts] = useState<string[]>([]);
     const cursorRef = useRef<HTMLSpanElement>(null);
     const containerRef = useRef<HTMLElement>(null);
+    const prefersReducedMotion = usePrefersReducedMotion();
 
     const textArray = useMemo(() => (Array.isArray(text) ? text : [text]), [text]);
+
+    useEffect(() => {
+        if (!prefersReducedMotion) return;
+        if (accumulate) {
+            setCompletedTexts(textArray.slice(0, -1));
+            const last = textArray[textArray.length - 1] ?? "";
+            setDisplayedText(last);
+            setCurrentCharIndex(last.length);
+            setCurrentTextIndex(textArray.length - 1);
+            setIsDeleting(false);
+        } else {
+            const first = textArray[0] ?? "";
+            setDisplayedText(first);
+            setCurrentCharIndex(first.length);
+            setCurrentTextIndex(0);
+        }
+    }, [prefersReducedMotion, textArray, accumulate]);
 
     const getRandomSpeed = useCallback(() => {
         if (!variableSpeed) return typingSpeed;
@@ -96,7 +115,7 @@ const TextType = ({
     }, [startOnVisible]);
 
     useEffect(() => {
-        if (showCursor && cursorRef.current) {
+        if (showCursor && cursorRef.current && !prefersReducedMotion) {
             gsap.set(cursorRef.current, { opacity: 1 });
             gsap.to(cursorRef.current, {
                 opacity: 0,
@@ -111,10 +130,10 @@ const TextType = ({
                 gsap.killTweensOf(cursorRef.current);
             }
         };
-    }, [showCursor, cursorBlinkDuration]);
+    }, [showCursor, cursorBlinkDuration, prefersReducedMotion]);
 
     useEffect(() => {
-        if (!isVisible) return;
+        if (!isVisible || prefersReducedMotion) return;
         let timeout: ReturnType<typeof setTimeout>;
         const currentText = textArray[currentTextIndex];
         const processedText = reverseMode ? currentText.split("").reverse().join("") : currentText;
@@ -200,6 +219,7 @@ const TextType = ({
         noDelete,
         accumulate,
         getRandomSpeed,
+        prefersReducedMotion,
     ]);
 
     const isAccumulateComplete =

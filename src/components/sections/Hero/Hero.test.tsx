@@ -25,8 +25,8 @@ vi.mock("../../ui/TextType/TextType", () => ({
 describe("Hero", () => {
     it("renders headline with accent span", () => {
         render(<Hero />);
-        expect(screen.getByText(/AI-native/)).toBeInTheDocument();
-        expect(screen.getByText(/Code-ready/)).toBeInTheDocument();
+        expect(screen.getByText("AI-native.")).toBeInTheDocument();
+        expect(screen.getByText("Code-ready.")).toBeInTheDocument();
     });
 
     it("renders CTA buttons", () => {

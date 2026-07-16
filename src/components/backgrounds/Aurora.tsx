@@ -1,5 +1,6 @@
 import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
 import { useEffect, useRef } from "react";
+import { usePrefersReducedMotion } from "../../hooks/usePrefersReducedMotion";
 
 const VERT = `#version 300 es
 in vec2 position;
@@ -108,12 +109,14 @@ interface AuroraProps {
 
 export default function Aurora(props: AuroraProps) {
     const { colorStops = ["#5227FF", "#7cff67", "#5227FF"], amplitude = 1.0, blend = 0.5 } = props;
-    const propsRef = useRef<AuroraProps>(props);
+    const propsRef = useRef(props);
     propsRef.current = props;
     const ctnDom = useRef<HTMLDivElement>(null);
 
     const cachedColorsRef = useRef<[number, number, number][]>([]);
     const cachedColorKeyRef = useRef<string>("");
+
+    const prefersReducedMotion = usePrefersReducedMotion();
 
     useEffect(() => {
         const key = colorStops.join(",");
@@ -127,11 +130,16 @@ export default function Aurora(props: AuroraProps) {
         const ctn = ctnDom.current;
         if (!ctn) return;
 
-        const renderer = new Renderer({
-            alpha: true,
-            premultipliedAlpha: true,
-            antialias: true,
-        });
+        let renderer: Renderer | undefined;
+        try {
+            renderer = new Renderer({
+                alpha: true,
+                premultipliedAlpha: true,
+                antialias: true,
+            });
+        } catch {
+            return;
+        }
 
         const gl = renderer.gl;
         gl.clearColor(0, 0, 0, 0);
@@ -145,7 +153,7 @@ export default function Aurora(props: AuroraProps) {
             if (!ctn) return;
             const width = ctn.offsetWidth;
             const height = ctn.offsetHeight;
-            renderer.setSize(width, height);
+            renderer?.setSize(width, height);
             if (program) {
                 program.uniforms.uResolution.value = [width, height];
             }
@@ -178,11 +186,11 @@ export default function Aurora(props: AuroraProps) {
             animateId = requestAnimationFrame(update);
             const { amplitude: a, blend: b } = propsRef.current;
             if (program) {
-                program.uniforms.uTime.value = t * 0.01 * 0.1;
+                program.uniforms.uTime.value = prefersReducedMotion ? 0 : t * 0.01 * 0.1;
                 program.uniforms.uAmplitude.value = a ?? 1.0;
                 program.uniforms.uBlend.value = b ?? blend;
                 program.uniforms.uColorStops.value = cachedColorsRef.current;
-                renderer.render({ scene: mesh });
+                renderer?.render({ scene: mesh });
             }
         };
 
@@ -197,7 +205,7 @@ export default function Aurora(props: AuroraProps) {
             }
             gl.getExtension("WEBGL_lose_context")?.loseContext();
         };
-    }, [amplitude, blend]);
+    }, [amplitude, blend, prefersReducedMotion]);
 
     return <div ref={ctnDom} className="w-full h-full" />;
 }

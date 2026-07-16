@@ -15,7 +15,7 @@ export function useScrollPosition(): ScrollPosition {
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });
-        handleScroll();
+        setScrollY(window.scrollY);
 
         return () => {
             window.removeEventListener("scroll", handleScroll);

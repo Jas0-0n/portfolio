@@ -1,4 +1,4 @@
-import { social } from "../../../data/social";
+import { email, footerNav, social } from "../../../data/social";
 
 export function Footer() {
     return (
@@ -8,7 +8,7 @@ export function Footer() {
                     <div className="text-[clamp(1.4rem,3vw,2rem)] font-bold mb-2">
                         Let's build something{" "}
                         <a
-                            href="mailto:your.email@example.com"
+                            href={`mailto:${email}`}
                             className="text-accent relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-0.5 after:bg-accent after:scale-x-0 after:origin-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-left"
                         >
                             together
@@ -41,24 +41,15 @@ export function Footer() {
                         © 2026 Jason Chen. All rights reserved.
                     </span>
                     <div className="flex gap-5">
-                        <a
-                            href="#about"
-                            className="text-[0.75rem] text-text-ter hover:text-text transition-colors"
-                        >
-                            About
-                        </a>
-                        <a
-                            href="#experience"
-                            className="text-[0.75rem] text-text-ter hover:text-text transition-colors"
-                        >
-                            Experience
-                        </a>
-                        <a
-                            href="#work"
-                            className="text-[0.75rem] text-text-ter hover:text-text transition-colors"
-                        >
-                            Work
-                        </a>
+                        {footerNav.map((link) => (
+                            <a
+                                key={link.href}
+                                href={link.href}
+                                className="text-[0.75rem] text-text-ter hover:text-text transition-colors"
+                            >
+                                {link.label}
+                            </a>
+                        ))}
                     </div>
                 </div>
             </div>

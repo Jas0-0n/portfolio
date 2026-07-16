@@ -34,7 +34,7 @@ describe("App", () => {
     it("renders Header, Hero content, and Footer", () => {
         render(<App />);
         expect(screen.getByText("Jason")).toBeInTheDocument();
-        expect(screen.getByText(/AI-native/)).toBeInTheDocument();
+        expect(screen.getByText("AI-native.")).toBeInTheDocument();
         expect(screen.getByText(/© 2026 Jason Chen/)).toBeInTheDocument();
     });
 });

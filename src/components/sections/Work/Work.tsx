@@ -5,7 +5,7 @@ import { WorkCard } from "../../ui/WorkCard";
 
 export function Work() {
     const heading = useIntersectionObserver();
-    const cardVisibility = work.map(() => useIntersectionObserver());
+    const grid = useIntersectionObserver();
 
     return (
         <section className="py-24 border-b border-border" id="work">
@@ -19,15 +19,16 @@ export function Work() {
                 >
                     Featured projects
                 </h2>
-                <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+                <div
+                    ref={grid.ref as React.RefObject<HTMLDivElement>}
+                    className="grid grid-cols-2 gap-5 max-md:grid-cols-1"
+                >
                     {work.map((w, idx) => {
-                        const card = cardVisibility[idx];
                         const delay = idx < 3 ? `reveal-delay-${idx + 1}` : "";
                         return (
                             <div
-                                key={idx}
-                                ref={card.ref as React.RefObject<HTMLDivElement>}
-                                className={`reveal ${delay} ${card.isVisible ? "is-visible" : ""}`}
+                                key={w.title}
+                                className={`reveal ${delay} ${grid.isVisible ? "is-visible" : ""}`}
                             >
                                 <WorkCard work={w} />
                             </div>

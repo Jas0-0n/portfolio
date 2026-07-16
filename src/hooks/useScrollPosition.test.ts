@@ -32,4 +32,40 @@ describe("useScrollPosition", () => {
         });
         expect(result.current.isPastThreshold).toBe(true);
     });
+
+    it("isScrolled is false at exactly 50 (threshold is > 50)", () => {
+        const { result } = renderHook(() => useScrollPosition());
+        act(() => {
+            window.scrollY = 50;
+            window.dispatchEvent(new Event("scroll"));
+        });
+        expect(result.current.isScrolled).toBe(false);
+    });
+
+    it("isScrolled is true at 51", () => {
+        const { result } = renderHook(() => useScrollPosition());
+        act(() => {
+            window.scrollY = 51;
+            window.dispatchEvent(new Event("scroll"));
+        });
+        expect(result.current.isScrolled).toBe(true);
+    });
+
+    it("isPastThreshold is false at exactly 400", () => {
+        const { result } = renderHook(() => useScrollPosition());
+        act(() => {
+            window.scrollY = 400;
+            window.dispatchEvent(new Event("scroll"));
+        });
+        expect(result.current.isPastThreshold).toBe(false);
+    });
+
+    it("isPastThreshold is true at 401", () => {
+        const { result } = renderHook(() => useScrollPosition());
+        act(() => {
+            window.scrollY = 401;
+            window.dispatchEvent(new Event("scroll"));
+        });
+        expect(result.current.isPastThreshold).toBe(true);
+    });
 });

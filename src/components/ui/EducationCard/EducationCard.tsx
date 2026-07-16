@@ -8,7 +8,7 @@ export function EducationCard({ items }: EducationCardProps) {
     return (
         <div className="bg-bg-card rounded-radius border border-border p-7 flex flex-col gap-4">
             {items.map((edu, idx) => (
-                <div key={idx}>
+                <div key={`${edu.school}-${idx}`}>
                     {idx > 0 && <div className="h-px bg-border my-4" />}
                     <div>
                         <div className="font-semibold text-sm">{edu.degree}</div>
