@@ -6,7 +6,8 @@
         "useIgnoreFile": true
     },
     "files": {
-        "ignoreUnknown": false
+        "ignoreUnknown": false,
+        "includes": ["**", "!commitlint.config.js", "!biome.json"]
     },
     "formatter": {
         "enabled": true,
